@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requestJson } from "@/lib/api-client";
+import { debounce } from "@/lib/utils";
+import { Avatar } from "@/components/Avatar";
+import { ContactSkeleton } from "@/components/Skeleton";
 
 type Tag = { id: number; name: string; color: string; _count?: { contacts: number } };
 type Contact = {
@@ -34,6 +37,7 @@ export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [filterTag, setFilterTag] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -43,11 +47,23 @@ export default function ContactsPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  // Debounced search handler (debounce is a stable utility, safe without deps)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => setDebouncedQ(value), 300),
+    []
+  );
+
+  const handleQChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQ(e.target.value);
+    debouncedSearch(e.target.value);
+  };
+
   const loadContacts = useCallback(async () => {
     setLoadingContacts(true);
     try {
       const params = new URLSearchParams();
-      if (q.trim()) params.set("q", q.trim());
+      if (debouncedQ.trim()) params.set("q", debouncedQ.trim());
       if (filterTag) params.set("tagId", String(filterTag));
       const query = params.toString();
       const data = await requestJson<Contact[]>(
@@ -64,7 +80,7 @@ export default function ContactsPage() {
     } finally {
       setLoadingContacts(false);
     }
-  }, [filterTag, q]);
+  }, [filterTag, debouncedQ]);
 
   const loadTags = useCallback(async () => {
     setLoadingTags(true);
@@ -149,6 +165,12 @@ export default function ContactsPage() {
     return `https://wa.me/${cleaned}`;
   };
 
+  const clearFilters = () => {
+    setQ("");
+    setDebouncedQ("");
+    setFilterTag(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -181,7 +203,7 @@ export default function ContactsPage() {
         <div className="rounded-lg border bg-white p-4">
           <p className="text-sm text-gray-500">Active Filter</p>
           <p className="mt-1 text-sm font-medium text-gray-700">
-            {activeTag ? activeTag.name : q.trim() ? `Search: ${q.trim()}` : "None"}
+            {activeTag ? activeTag.name : debouncedQ.trim() ? `Search: ${debouncedQ.trim()}` : "None"}
           </p>
         </div>
       </div>
@@ -287,13 +309,27 @@ export default function ContactsPage() {
 
       <div className="bg-white rounded-lg border p-4 space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="text"
-            placeholder="Search contacts..."
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm flex-1"
-          />
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={q}
+              onChange={handleQChange}
+              className="border rounded-lg px-3 py-2 text-sm w-full pr-10"
+            />
+            {q && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQ("");
+                  setDebouncedQ("");
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <select
             value={filterTag ?? ""}
             onChange={(e) => setFilterTag(e.target.value ? Number(e.target.value) : null)}
@@ -308,10 +344,7 @@ export default function ContactsPage() {
           </select>
           <button
             type="button"
-            onClick={() => {
-              setQ("");
-              setFilterTag(null);
-            }}
+            onClick={clearFilters}
             className="border rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
           >
             Reset
@@ -323,10 +356,10 @@ export default function ContactsPage() {
       </div>
 
       {loadingContacts ? (
-        <div className="rounded-lg border bg-white p-6 text-sm text-gray-500">Loading contacts...</div>
+        <ContactSkeleton />
       ) : contacts.length === 0 ? (
         <div className="rounded-lg border bg-white p-6 text-sm text-gray-500">
-          {q.trim() || filterTag
+          {debouncedQ.trim() || filterTag
             ? "No contacts matched your current search or tag filter."
             : "No contacts yet. Add your first contact to get started."}
         </div>
@@ -337,27 +370,30 @@ export default function ContactsPage() {
               key={contact.id}
               className="bg-white rounded-lg border p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between hover:border-gray-300"
             >
-              <Link href={`/contacts/${contact.id}`} className="flex-1 min-w-0">
-                <div className="font-medium truncate">{contact.name}</div>
-                <div className="text-sm text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span>{contact.phone}</span>
-                  {contact.company && <span className="text-gray-400">{contact.company}</span>}
-                  {contact.email && <span className="text-gray-400">{contact.email}</span>}
-                </div>
-                {contact.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {contact.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <Avatar name={contact.name} className="w-10 h-10 text-sm" />
+                <Link href={`/contacts/${contact.id}`} className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{contact.name}</div>
+                  <div className="text-sm text-gray-500 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span>{contact.phone}</span>
+                    {contact.company && <span className="text-gray-400">{contact.company}</span>}
+                    {contact.email && <span className="text-gray-400">{contact.email}</span>}
                   </div>
-                )}
-              </Link>
+                  {contact.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {contact.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${tag.color}20`, color: tag.color }}
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              </div>
               <div className="flex items-center gap-2 sm:ml-4">
                 <a
                   href={whatsappLink(contact.phone)}

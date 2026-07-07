@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { requestJson, deleteInteraction, updateInteraction } from "@/lib/api-client";
+import { formatDate } from "@/lib/utils";
+import { Avatar } from "@/components/Avatar";
 
 type Tag = { id: number; name: string; color: string };
 type Interaction = { id: number; type: string; content: string; createdAt: string };
@@ -383,12 +385,15 @@ export default function ContactDetailPage() {
       ) : (
         <div className="bg-white rounded-lg border p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="text-xl font-bold">{contact.name}</h2>
-              <div className="mt-2 space-y-1 text-sm text-gray-600">
-                <p>Phone: {contact.phone}</p>
-                {contact.email && <p>Email: {contact.email}</p>}
-                {contact.company && <p>Company: {contact.company}</p>}
+            <div className="flex items-start gap-4">
+              <Avatar name={contact.name} className="w-12 h-12 text-base" />
+              <div>
+                <h2 className="text-xl font-bold">{contact.name}</h2>
+                <div className="mt-2 space-y-1 text-sm text-gray-600">
+                  <p>Phone: {contact.phone}</p>
+                  {contact.email && <p>Email: {contact.email}</p>}
+                  {contact.company && <p>Company: {contact.company}</p>}
+                </div>
               </div>
             </div>
             <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
@@ -513,7 +518,7 @@ export default function ContactDetailPage() {
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <span className="font-medium uppercase">{interaction.type}</span>
                       <span>&middot;</span>
-                      <span>{new Date(interaction.createdAt).toLocaleDateString()}</span>
+                      <span>{formatDate(interaction.createdAt)}</span>
                     </div>
                     <div className="flex gap-1">
                       <button
