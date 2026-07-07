@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import {
+  escapeLike,
   handleApiError,
   parseContactInput,
   parseIdParam,
@@ -16,11 +17,12 @@ export async function GET(req: NextRequest) {
     const where: Record<string, unknown> = {};
 
     if (q) {
+      const escaped = escapeLike(q);
       where.OR = [
-        { name: { contains: q } },
-        { phone: { contains: q } },
-        { email: { contains: q } },
-        { company: { contains: q } },
+        { name: { contains: escaped } },
+        { phone: { contains: escaped } },
+        { email: { contains: escaped } },
+        { company: { contains: escaped } },
       ];
     }
 

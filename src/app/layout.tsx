@@ -5,6 +5,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CRM",
   description: "Lightweight CRM for micro-businesses",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

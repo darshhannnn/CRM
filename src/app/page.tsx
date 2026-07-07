@@ -227,41 +227,66 @@ export default function ContactsPage() {
             {loadingTags && <span className="text-xs text-gray-500">Loading tags...</span>}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              placeholder="Name *"
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Phone *"
-              required
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Company"
-              value={form.company}
-              onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
+            <div>
+              <label htmlFor="contact-name" className="block text-xs font-medium text-gray-700 mb-1">
+                Name *
+              </label>
+              <input
+                id="contact-name"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-phone" className="block text-xs font-medium text-gray-700 mb-1">
+                Phone *
+              </label>
+              <input
+                id="contact-phone"
+                required
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-email" className="block text-xs font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                id="contact-email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-company" className="block text-xs font-medium text-gray-700 mb-1">
+                Company
+              </label>
+              <input
+                id="contact-company"
+                value={form.company}
+                onChange={(e) => setForm({ ...form, company: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="contact-notes" className="block text-xs font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              id="contact-notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="border rounded-lg px-3 py-2 text-sm w-full"
+              rows={3}
             />
           </div>
-          <textarea
-            placeholder="Notes"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="border rounded-lg px-3 py-2 text-sm w-full"
-            rows={3}
-          />
           {tags.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Tags</p>

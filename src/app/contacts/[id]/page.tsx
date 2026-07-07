@@ -288,41 +288,66 @@ export default function ContactDetailPage() {
       {editing ? (
         <form onSubmit={save} className="bg-white rounded-lg border p-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <input
-              placeholder="Name"
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Phone"
-              required
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
-            />
-            <input
-              placeholder="Company"
-              value={form.company}
-              onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className="border rounded-lg px-3 py-2 text-sm"
+            <div>
+              <label htmlFor="edit-name" className="block text-xs font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                id="edit-name"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-phone" className="block text-xs font-medium text-gray-700 mb-1">
+                Phone
+              </label>
+              <input
+                id="edit-phone"
+                required
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-email" className="block text-xs font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                id="edit-email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-company" className="block text-xs font-medium text-gray-700 mb-1">
+                Company
+              </label>
+              <input
+                id="edit-company"
+                value={form.company}
+                onChange={(e) => setForm({ ...form, company: e.target.value })}
+                className="border rounded-lg px-3 py-2 text-sm w-full"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="edit-notes" className="block text-xs font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              id="edit-notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="border rounded-lg px-3 py-2 text-sm w-full"
+              rows={4}
             />
           </div>
-          <textarea
-            placeholder="Notes"
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            className="border rounded-lg px-3 py-2 text-sm w-full"
-            rows={4}
-          />
           {allTags.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-gray-500">Tags</p>
@@ -424,22 +449,34 @@ export default function ContactDetailPage() {
       <div className="bg-white rounded-lg border p-4">
         <h3 className="font-semibold mb-3">Add Interaction</h3>
         <form onSubmit={addInteractionHandler} className="flex flex-col gap-2 sm:flex-row">
-          <select
-            value={newInteraction.type}
-            onChange={(e) => setNewInteraction({ ...newInteraction, type: e.target.value })}
-            className="border rounded-lg px-3 py-2 text-sm sm:w-40"
-          >
-            <option value="note">Note</option>
-            <option value="call">Call</option>
-            <option value="meeting">Meeting</option>
-            <option value="whatsapp">WhatsApp</option>
-          </select>
-          <input
-            placeholder="What happened..."
-            value={newInteraction.content}
-            onChange={(e) => setNewInteraction({ ...newInteraction, content: e.target.value })}
-            className="border rounded-lg px-3 py-2 text-sm flex-1"
-          />
+          <div>
+            <label htmlFor="interaction-type" className="sr-only">
+              Interaction type
+            </label>
+            <select
+              id="interaction-type"
+              value={newInteraction.type}
+              onChange={(e) => setNewInteraction({ ...newInteraction, type: e.target.value })}
+              className="border rounded-lg px-3 py-2 text-sm sm:w-40"
+            >
+              <option value="note">Note</option>
+              <option value="call">Call</option>
+              <option value="meeting">Meeting</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+          <div className="flex-1">
+            <label htmlFor="interaction-content" className="sr-only">
+              Interaction details
+            </label>
+            <input
+              id="interaction-content"
+              placeholder="What happened..."
+              value={newInteraction.content}
+              onChange={(e) => setNewInteraction({ ...newInteraction, content: e.target.value })}
+              className="border rounded-lg px-3 py-2 text-sm w-full"
+            />
+          </div>
           <button
             type="submit"
             disabled={addingInteraction}

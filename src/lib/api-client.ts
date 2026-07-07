@@ -42,9 +42,8 @@ export async function updateTag(id: number, data: { name: string; color: string 
 
 // Interaction helpers
 export async function deleteInteraction(contactId: number, interactionId: number) {
-  return await requestJson(`/api/contacts/${contactId}/interactions`, {
+  return await requestJson(`/api/contacts/${contactId}/interactions/${interactionId}`, {
     method: "DELETE",
-    body: JSON.stringify({ interactionId }),
     fallbackMessage: "Failed to delete interaction",
   });
 }
@@ -54,9 +53,9 @@ export async function updateInteraction(
   interactionId: number,
   data: { type: string; content: string }
 ) {
-  return await requestJson(`/api/contacts/${contactId}/interactions`, {
+  return await requestJson(`/api/contacts/${contactId}/interactions/${interactionId}`, {
     method: "PUT",
-    body: JSON.stringify({ ...data, interactionId }),
+    body: JSON.stringify(data),
     fallbackMessage: "Failed to update interaction",
   });
 }

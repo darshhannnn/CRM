@@ -55,6 +55,10 @@ export function parseIdParam(value: unknown, fieldName = "id"): number {
   return parsed;
 }
 
+export function escapeLike(value: string): string {
+  return value.replace(/[%_]/g, (match) => `\\${match}`);
+}
+
 export async function readJsonBody(req: Request): Promise<JsonObject> {
   try {
     return asObject(await req.json());

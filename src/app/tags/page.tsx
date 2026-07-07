@@ -150,19 +150,26 @@ export default function TagsPage() {
 
       <form onSubmit={create} className="bg-white rounded-lg border p-4 space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            placeholder="Tag name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm sm:w-72"
-          />
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {saving ? "Adding..." : "Add Tag"}
-          </button>
+          <div className="sm:w-72">
+            <label htmlFor="tag-name" className="block text-xs font-medium text-gray-700 mb-1">
+              Tag name
+            </label>
+            <input
+              id="tag-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border rounded-lg px-3 py-2 text-sm w-full"
+            />
+          </div>
+          <div className="self-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {saving ? "Adding..." : "Add Tag"}
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           {COLORS.map((currentColor) => (
@@ -196,11 +203,17 @@ export default function TagsPage() {
               {editingId === tag.id ? (
                 <div className="space-y-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="border rounded-lg px-3 py-2 text-sm sm:w-72"
-                    />
+                    <div className="sm:w-72">
+                      <label htmlFor={`edit-tag-${tag.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                        Tag name
+                      </label>
+                      <input
+                        id={`edit-tag-${tag.id}`}
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="border rounded-lg px-3 py-2 text-sm w-full"
+                      />
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {COLORS.map((currentColor) => (
                         <button
