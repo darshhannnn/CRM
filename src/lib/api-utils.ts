@@ -71,7 +71,7 @@ export function parseContactInput(body: unknown) {
   const email = asOptionalString(payload.email);
   const company = asOptionalString(payload.company);
   const notes = asOptionalString(payload.notes);
-  const tagIds = asIdArray(payload.tagIds);
+  const tagIds = "tagIds" in payload ? asIdArray(payload.tagIds) : undefined;
 
   if (!name) {
     throw new ApiError(400, "Name is required");

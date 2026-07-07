@@ -1,7 +1,9 @@
 FROM node:20-alpine AS base
 WORKDIR /app
+ENV DATABASE_URL="file:./dev.db"
 
 FROM base AS deps
+COPY prisma ./prisma
 COPY package.json package-lock.json ./
 RUN npm ci
 
