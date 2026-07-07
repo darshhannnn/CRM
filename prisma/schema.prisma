@@ -1,6 +1,6 @@
 generator client {
-  provider        = "prisma-client-js"
-  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -20,6 +20,8 @@ model Contact {
 
   tags         Tag[]
   interactions Interaction[]
+
+  @@index([updatedAt])
 }
 
 model Tag {
@@ -38,4 +40,6 @@ model Interaction {
   createdAt DateTime @default(now())
 
   contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
 }

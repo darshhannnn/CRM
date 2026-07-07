@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { handleApiError, parseIdParam, parseTagInput } from "@/lib/api-utils";
+import { handleApiError, parseIdParam, parseTagInput, readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
@@ -8,7 +8,7 @@ export async function PUT(
 ) {
   try {
     const tagId = parseIdParam(params.id);
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const { name, color } = parseTagInput(body);
 
     // Check if name is already taken by another tag

@@ -13,6 +13,15 @@ export async function GET(
 ) {
   try {
     const contactId = parseIdParam(params.id);
+
+    const contactExists = await prisma.contact.findUnique({
+      where: { id: contactId },
+    });
+
+    if (!contactExists) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+    }
+
     const interactions = await prisma.interaction.findMany({
       where: { contactId },
       orderBy: { createdAt: "desc" },
