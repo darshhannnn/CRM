@@ -30,6 +30,13 @@ describe("formatDate", () => {
     expect(result).toMatch(/\w{3} \d{1,2}, \d{4}/);
   });
 
+  it("returns formatted date for future dates", () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const result = formatDate(tomorrow);
+    expect(result).toMatch(/\w{3} \d{1,2}, \d{4}/);
+  });
+
   it("handles string input", () => {
     const result = formatDate("2024-01-15T12:00:00Z");
     expect(result).toBeTruthy();
@@ -56,6 +63,19 @@ describe("getInitials", () => {
   it("handles single character names", () => {
     expect(getInitials("A")).toBe("A");
   });
+
+  it("returns '?' for empty string", () => {
+    expect(getInitials("")).toBe("?");
+  });
+
+  it("handles leading/trailing whitespace", () => {
+    expect(getInitials("  John  ")).toBe("J");
+    expect(getInitials("  John Doe  ")).toBe("JD");
+  });
+
+  it("handles names with multiple spaces", () => {
+    expect(getInitials("John  Doe")).toBe("JD");
+  });
 });
 
 describe("stringToColor", () => {
@@ -70,5 +90,10 @@ describe("stringToColor", () => {
 
   it("returns different colors for different inputs", () => {
     expect(stringToColor("hello")).not.toBe(stringToColor("world"));
+  });
+
+  it("handles empty string", () => {
+    const color = stringToColor("");
+    expect(color).toMatch(/^#[0-9a-f]{6}$/);
   });
 });

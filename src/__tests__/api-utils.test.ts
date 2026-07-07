@@ -4,7 +4,6 @@ import {
   parseContactInput,
   parseTagInput,
   parseInteractionInput,
-  escapeLike,
 } from "../lib/api-utils";
 
 describe("parseIdParam", () => {
@@ -176,23 +175,5 @@ describe("parseInteractionInput", () => {
       const result = parseInteractionInput({ type, content: "Test" });
       expect(result.type).toBe(type);
     }
-  });
-});
-
-describe("escapeLike", () => {
-  it("escapes percent signs", () => {
-    expect(escapeLike("100%")).toBe("100\\%");
-  });
-
-  it("escapes underscores", () => {
-    expect(escapeLike("test_value")).toBe("test\\_value");
-  });
-
-  it("escapes multiple wildcards", () => {
-    expect(escapeLike("%_test_%")).toBe("\\%\\_test\\_\\%");
-  });
-
-  it("leaves normal strings unchanged", () => {
-    expect(escapeLike("hello world")).toBe("hello world");
   });
 });

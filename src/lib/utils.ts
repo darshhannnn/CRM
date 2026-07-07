@@ -1,7 +1,6 @@
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   
-  // Check if date is valid
   if (isNaN(d.getTime())) {
     return "Invalid date";
   }
@@ -10,24 +9,24 @@ export function formatDate(date: Date | string): string {
   const diffMs = now.getTime() - d.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) {
-    // Today
+  if (diffDays < 0) {
+    return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  } else if (diffDays === 0) {
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } else if (diffDays === 1) {
-    // Yesterday
     return "Yesterday";
   } else if (diffDays < 7) {
-    // This week
     return d.toLocaleDateString([], { weekday: "long" });
   } else {
-    // Older
     return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
   }
 }
 
 export function getInitials(name: string): string {
-  return name
-    .split(" ")
+  const trimmed = name.trim();
+  if (!trimmed) return "?";
+  return trimmed
+    .split(/\s+/)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
