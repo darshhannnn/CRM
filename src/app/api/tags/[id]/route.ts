@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { handleApiError, parseIdParam, parseTagInput, readJsonBody } from "@/lib/api-utils";
+import { TagSchema } from "@/lib/validation";
+import { parseIdParam, readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(
@@ -9,9 +10,17 @@ export async function PUT(
   try {
     const tagId = parseIdParam(params.id);
     const body = await readJsonBody(req);
-    const { name, color } = parseTagInput(body);
+    const parsed = TagSchema.safeParse(body);
 
-    // Check if name is already taken by another tag
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { name, color } = parsed.data;
+
     const existingTagByName = await prisma.tag.findFirst({
       where: { name, NOT: { id: tagId } },
     });
@@ -30,7 +39,11 @@ export async function PUT(
 
     return NextResponse.json(updatedTag);
   } catch (error) {
-    return handleApiError(error, "Failed to update tag");
+    console.error("[PUT /api/tags/:id]", error);
+    return NextResponse.json(
+      { error: "Failed to update tag" },
+      { status: 500 }
+    );
   }
 }
 
@@ -43,6 +56,10 @@ export async function DELETE(
     await prisma.tag.delete({ where: { id: tagId } });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return handleApiError(error, "Failed to delete tag");
+    console.error("[DELETE /api/tags/:id]", error);
+    return NextResponse.json(
+      { error: "Failed to delete tag" },
+      { status: 500 }
+    );
   }
 }

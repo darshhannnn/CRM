@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import {
-  handleApiError,
-  parseIdParam,
-  parseInteractionInput,
-  readJsonBody,
-} from "@/lib/api-utils";
+import { InteractionSchema } from "@/lib/validation";
+import { parseIdParam, readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -29,7 +25,11 @@ export async function GET(
 
     return NextResponse.json(interactions);
   } catch (error) {
-    return handleApiError(error, "Failed to fetch interactions");
+    console.error("[GET /api/contacts/:id/interactions]", error);
+    return NextResponse.json(
+      { error: "Failed to fetch interactions" },
+      { status: 500 }
+    );
   }
 }
 
@@ -40,7 +40,16 @@ export async function POST(
   try {
     const contactId = parseIdParam(params.id);
     const body = await readJsonBody(req);
-    const { type, content } = parseInteractionInput(body);
+    const parsed = InteractionSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { type, content } = parsed.data;
 
     const contactExists = await prisma.contact.findUnique({
       where: { id: contactId },
@@ -65,6 +74,10 @@ export async function POST(
 
     return NextResponse.json(interaction, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "Failed to create interaction");
+    console.error("[POST /api/contacts/:id/interactions]", error);
+    return NextResponse.json(
+      { error: "Failed to create interaction" },
+      { status: 500 }
+    );
   }
 }

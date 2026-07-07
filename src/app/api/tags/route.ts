@@ -1,9 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import {
-  handleApiError,
-  parseTagInput,
-  readJsonBody,
-} from "@/lib/api-utils";
+import { TagSchema } from "@/lib/validation";
+import { readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
@@ -15,14 +12,27 @@ export async function GET() {
 
     return NextResponse.json(tags);
   } catch (error) {
-    return handleApiError(error, "Failed to fetch tags");
+    console.error("[GET /api/tags]", error);
+    return NextResponse.json(
+      { error: "Failed to fetch tags" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await readJsonBody(req);
-    const { name, color } = parseTagInput(body);
+    const parsed = TagSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { name, color } = parsed.data;
 
     const existing = await prisma.tag.findUnique({ where: { name } });
     if (existing) {
@@ -30,11 +40,15 @@ export async function POST(req: NextRequest) {
     }
 
     const tag = await prisma.tag.create({
-      data: { name, color: color || "#6366f1" },
+      data: { name, color },
     });
 
     return NextResponse.json(tag, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "Failed to create tag");
+    console.error("[POST /api/tags]", error);
+    return NextResponse.json(
+      { error: "Failed to create tag" },
+      { status: 500 }
+    );
   }
 }

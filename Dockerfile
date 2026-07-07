@@ -15,7 +15,7 @@ RUN npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -32,5 +32,8 @@ USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV DATABASE_URL="file:/app/data/dev.db"
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]

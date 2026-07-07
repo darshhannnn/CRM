@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import {
-  handleApiError,
-  parseContactInput,
-  parseIdParam,
-  readJsonBody,
-} from "@/lib/api-utils";
+import { ContactSchema } from "@/lib/validation";
+import { parseIdParam, readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -36,14 +32,27 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(contacts);
   } catch (error) {
-    return handleApiError(error, "Failed to fetch contacts");
+    console.error("[GET /api/contacts]", error);
+    return NextResponse.json(
+      { error: "Failed to fetch contacts" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await readJsonBody(req);
-    const { name, phone, email, company, notes, tagIds } = parseContactInput(body);
+    const parsed = ContactSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { name, phone, email, company, notes, tagIds } = parsed.data;
 
     const contact = await prisma.contact.create({
       data: {
@@ -53,7 +62,7 @@ export async function POST(req: NextRequest) {
         company: company || null,
         notes: notes || null,
         tags: tagIds?.length
-          ? { connect: tagIds.map((id: number) => ({ id })) }
+          ? { connect: tagIds.map((id) => ({ id })) }
           : undefined,
       },
       include: { tags: true },
@@ -61,6 +70,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
-    return handleApiError(error, "Failed to create contact");
+    console.error("[POST /api/contacts]", error);
+    return NextResponse.json(
+      { error: "Failed to create contact" },
+      { status: 500 }
+    );
   }
 }

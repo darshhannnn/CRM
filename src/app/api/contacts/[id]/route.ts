@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import {
-  handleApiError,
-  parseContactInput,
-  parseIdParam,
-  readJsonBody,
-} from "@/lib/api-utils";
+import { ContactSchema } from "@/lib/validation";
+import { parseIdParam, readJsonBody } from "@/lib/api-utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -24,7 +20,11 @@ export async function GET(
 
     return NextResponse.json(contact);
   } catch (error) {
-    return handleApiError(error, "Failed to fetch contact");
+    console.error("[GET /api/contacts/:id]", error);
+    return NextResponse.json(
+      { error: "Failed to fetch contact" },
+      { status: 500 }
+    );
   }
 }
 
@@ -35,7 +35,16 @@ export async function PUT(
   try {
     const contactId = parseIdParam(params.id);
     const body = await readJsonBody(req);
-    const { name, phone, email, company, notes, tagIds } = parseContactInput(body);
+    const parsed = ContactSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+
+    const { name, phone, email, company, notes, tagIds } = parsed.data;
 
     const contact = await prisma.contact.update({
       where: { id: contactId },
@@ -46,7 +55,7 @@ export async function PUT(
         company: company || null,
         notes: notes || null,
         tags: tagIds !== undefined
-          ? { set: tagIds.map((id: number) => ({ id })) }
+          ? { set: tagIds.map((id) => ({ id })) }
           : undefined,
       },
       include: { tags: true },
@@ -54,7 +63,11 @@ export async function PUT(
 
     return NextResponse.json(contact);
   } catch (error) {
-    return handleApiError(error, "Failed to update contact");
+    console.error("[PUT /api/contacts/:id]", error);
+    return NextResponse.json(
+      { error: "Failed to update contact" },
+      { status: 500 }
+    );
   }
 }
 
@@ -67,6 +80,10 @@ export async function DELETE(
     await prisma.contact.delete({ where: { id: contactId } });
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return handleApiError(error, "Failed to delete contact");
+    console.error("[DELETE /api/contacts/:id]", error);
+    return NextResponse.json(
+      { error: "Failed to delete contact" },
+      { status: 500 }
+    );
   }
 }
