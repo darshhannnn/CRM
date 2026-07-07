@@ -1,0 +1,41 @@
+generator client {
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Contact {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String
+  email     String?
+  company   String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tags         Tag[]
+  interactions Interaction[]
+}
+
+model Tag {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  color    String   @default("#6366f1")
+
+  contacts Contact[]
+}
+
+model Interaction {
+  id        Int      @id @default(autoincrement())
+  contactId Int
+  type      String   @default("note")
+  content   String
+  createdAt DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
